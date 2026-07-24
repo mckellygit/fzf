@@ -3,8 +3,9 @@ CHANGELOG
 
 0.74.2
 ------
-- Up to 2x faster matching for single-character queries
+- Single-character queries are up to 2.4x faster
     - This is the most latency-sensitive case; the first keystroke scans the entire list before the result cache can help
+- Faster sorting of search results; the default two-criteria ranking skips redundant radix passes
 - Fixed nondeterministic match highlight positions
 - fzf now detects terminal resize on Windows in `--height` mode (#4790) (@Cyrus580529)
 - Fixed signal handler cleanup when fzf is used as a library; SIGINT/SIGTERM/SIGHUP and resize handlers no longer persist after `Run()` returns

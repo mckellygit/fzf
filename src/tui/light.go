@@ -542,6 +542,29 @@ func (r *LightRenderer) escSequence(sz *int) Event {
 		return Event{Invalid, 0, nil}
 	}
 
+	// Ctrl-Backspace:
+	//   CSI 127;5u       - CSI-u / Kitty keyboard encoding
+	//   CSI 27;5;127~    - xterm modifyOtherKeys encoding
+	ctrlBackspaceSequences := [][]byte{
+		[]byte("\x1b[127;5u"),
+		[]byte("\x1b[27;5;127~"),
+	}
+
+	for _, sequence := range ctrlBackspaceSequences {
+		if len(r.buffer) >= len(sequence) &&
+			bytes.Equal(r.buffer[:len(sequence)], sequence) {
+			*sz = len(sequence)
+			return Event{CtrlBackspace, 0, nil}
+		}
+
+		// The input reader may not have received the whole sequence yet.
+		// Return Invalid without consuming ESC so GetChar can retry.
+		if len(r.buffer) < len(sequence) &&
+			bytes.Equal(r.buffer, sequence[:len(r.buffer)]) {
+			return Event{Invalid, 0, nil}
+		}
+	}
+
 	*sz = 2
 	if r.buffer[1] == 8 {
 		return Event{CtrlAltBackspace, 0, nil}
